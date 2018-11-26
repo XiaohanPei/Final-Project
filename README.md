@@ -1,22 +1,11 @@
-# 590PR Final_Project
-Fork from here to create your final project repository.
-
-Two things are different than all the previous assignments in 590PR regarding the permissions settings:
-
-1. Please KEEP the "All_Students" team to have Read access.  
-2. Whenever you choose to, you are welcome to change your Final Project repository to private or to public.  This will enable you to list it in your resume, website, or other portfolio.
-
-DELETE these lines from TEMPLATE up.
-
-TEMPLATE for your report to fill out:
-
 # Title: 
-"The Werewolves of Miller's Hollow" Game Simulation
+**"The Werewolves of Miller's Hollow" Game Simulation**
 ## Team Member(s):
-Jingxian Na, Xiaohan Pei, Ran Li
+Xiaohan Pei, Ran Li, Jingxian Na,
 
 # Monte Carlo Simulation Scenario & Purpose:
-(be sure to read the instructions given in course Moodle)
+In a basic *Werewwolf* game, there are two opposing groups: the werewolves and the villagers, and the aim of game for each group is to kill all their opponents. The game is divided into two parts: nights, during which werewolves take action to kill a villiager and some special villiagers to perform their special action; days, when all players open their eyes, debate and vote a player they think is werewolf, and remove him or her out of this game. The intriguing part of the game lies in that all players know nothing but their own roles in the beginning(except for werewolves, they recognize each other in the first night), which makes it possible for werewolf players to pretend themselves to be villagers and lead other players to vote real villiagers out of game. As the game progresses, players get more and more information from deaths in nights and debates in days, to help them guess others' roles and make a plausible speech in debates to convince other players.
+In this program, we use Monte Carlo simulation to simulate players' votes in each day of a game, and analyze the game result data. We first let all players vote randomly and get the results, then we give each player a vote preference based on their roles and the popular tactics of this games, and compare the new reults data with the old one, to see if those tactics really help players win this game.
 
 ## Simulation's variables of uncertainty
 List and describe your simulation's variables of uncertainty (where you're using pseudo-random number generation). For each such variable, how did you decide the range and probability distribution to use?  Do you think it's a good representation of reality?
@@ -28,3 +17,5 @@ List and describe your simulation's variables of uncertainty (where you're using
 ## Instructions on how to use the program:
 
 ## All Sources Used:
+https://en.wikipedia.org/wiki/The_Werewolves_of_Millers_Hollow
+http://blog.sina.com.cn/s/blog_70930a3f0101hr5x.html
