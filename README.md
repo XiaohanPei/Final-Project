@@ -11,7 +11,7 @@ In this program, we use Monte Carlo simulation to simulate players' votes in eac
 ## Simulation's variables of uncertainty
 The variables of uncertainty in this program are each player's vote in days and each werewolf's vote in nights(to decide which villager to kill). For the first part of the program, we let all players vote randomly: anyone but themselves in days and any players including themselves in nights. In the second part, we assign different vote preference to each players baesd on popular tactics.
 
-We think these uncertain variables can represent real players' actions in game to some extent, for people in real games make decisions based on others' characteristics, speeches, facial expressions and body languages, all of which can be simulated by random variables.
+We think these uncertain variables can represent real players' actions in game to some extent, for people in real games make decisions based on others' characteristics(if they know each other), actions, speeches, facial expressions and body languages, all of which can be simulated by random variables.
 
 ## Hypothesis or hypotheses before running the simulation:
 
