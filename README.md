@@ -1,7 +1,7 @@
 # Title: 
 **"The Werewolves of Miller's Hollow" Game Simulation**
 ## Team Member(s):
-Xiaohan Pei, Ran Li, Jingxian Na,
+Xiaohan Pei, Ran Li, Jingxian Na
 
 # Monte Carlo Simulation Scenario & Purpose:
 In a basic *Werewwolf* game, there are two opposing groups: the werewolves and the villagers, and the aim of game for each group is to kill all their opponents. The game is divided into two parts: nights, during which werewolves take action to kill a villiager and some special villiagers to perform their special action; days, when all players open their eyes, debate and vote a player they think is werewolf, and remove him or her out of this game. The intriguing part of the game lies in that all players know nothing but their own roles in the beginning(except for werewolves, they recognize each other in the first night), which makes it possible for werewolf players to pretend themselves to be villagers and lead other players to vote real villagers out of game. As the game progresses, players get more and more information from deaths in nights and debates in days, to help them guess others' roles and make a plausible speech in debates to convince other players.
