@@ -11,9 +11,9 @@ DELETE these lines from TEMPLATE up.
 TEMPLATE for your report to fill out:
 
 # Title: 
-
+"The Werewolves of Miller's Hollow" Game Simulation
 ## Team Member(s):
-(Note: Don't put your email addresses here (which is public).  If a student wants their NAME hidden as well, due to optional FERPA regulations, they can be listed purely by their GitHub ID).
+Jingxian Na, Xiaohan Pei, Ran Li
 
 # Monte Carlo Simulation Scenario & Purpose:
 (be sure to read the instructions given in course Moodle)
