@@ -21,4 +21,5 @@ We think these uncertain variables can represent real players' actions in game t
 
 ## All Sources Used:
 https://en.wikipedia.org/wiki/The_Werewolves_of_Millers_Hollow
+
 http://blog.sina.com.cn/s/blog_70930a3f0101hr5x.html
