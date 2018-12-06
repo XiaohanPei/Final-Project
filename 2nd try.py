@@ -10,8 +10,6 @@ class Role(Enum):
     Werewolf = 1
     Guard = 2
     Seer = 3
-    Unknown = 4
-
 
 class Game(object):
     def __init__(self, num_players):
@@ -29,7 +27,6 @@ class Game(object):
                 self.player_role[i] = Player(i, Role.Villager, self.num_players)
 
     def alive_players(self):
-        # NOT SURE IF WE SHOULD KEEP THE ROLE OR PLAYER_ID
         alive_players = []
         for player in list(self.player_role.values()):
             if player.is_alive:
