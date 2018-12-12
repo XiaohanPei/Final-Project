@@ -215,12 +215,8 @@ class Game(object):
 
     def vote_for_two_accusations(self,sheriff_id, sheriff_credit, sheriff_accused_id, seer_id, seer_credit, seer_accused_id):
         votes = {}
-        accused_players = []
-        accused_players.append(sheriff_accused_id)
-        accused_players.append(seer_accused_id)
         for pid in self.alive_players_id():
             votes[pid] = 0
-
         for player in self.alive_players():
             if player.player_id == sheriff_id:
                 votes[sheriff_accused_id] += 1
@@ -250,7 +246,7 @@ class Game(object):
                             new_accuse_id = random.choice(self.alive_players_id_besides(sheriff_accused_id, seer_accused_id))
                             votes[new_accuse_id] += 1
                 else:
-                    accuse_id = random.choice(accused_players)
+                    accuse_id = random.choice(sheriff_accused_id, seer_accused_id)
                     votes[accuse_id] += 1
 
         votes_highest = defaultdict(list)
@@ -284,13 +280,11 @@ class Game(object):
                     if other.title == 'sheriff' and other.role != Role.Seer:
                         player_checked = other
                 seer.identity.append(player_checked)
-
                 if player_checked.role == Role.Werewolf:
                     seer.credit += 0.1
                 else:
                     seer.credit += 0.05
-
-                if seer.credit > 0.8:
+                if seer.credit >= 0.8:
                     seer.credit = 0.8
 
         if player_saved != player_killed:
@@ -400,10 +394,8 @@ class Player(object):
                     protected = sheriff
                 else:
                     protected = random.choice(civilian)
-
         return protected
 
 if __name__ == "__main__":
     aGame = Game(11)
     aGame.play()
-
