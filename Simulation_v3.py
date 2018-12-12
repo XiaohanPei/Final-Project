@@ -43,9 +43,11 @@ class Game(object):
 
         if villagersWon:
             print("The Villagers have won!")
+            return 'v'
 
         else:
             print("The Werewolves have won!")
+            return "w"
 
     def WerewolvesWon(self):
         return len(self.alive_nonwerewolves_id()) <= len(self.alive_werewolves_id())
@@ -246,7 +248,19 @@ class Game(object):
                             new_accuse_id = random.choice(self.alive_players_id_besides(sheriff_accused_id, seer_accused_id))
                             votes[new_accuse_id] += 1
                 else:
-                    accuse_id = random.choice(sheriff_accused_id, seer_accused_id)
+                    accuse_ids = [sheriff_accused_id, seer_accused_id]
+                    accuse_id = random.choice(accuse_ids)
+                    if accuse_id == sheriff_accused_id:
+                        if bernoulli.rvs(sheriff_credit) == 1:
+                            accuse_id = sheriff_accused_id
+                        else:
+                            accuse_id = random.choice(self.alive_players_id_except(sheriff_accused_id))
+                    else:
+                        if bernoulli.rvs(seer_credit) == 1:
+                            accuse_id = seer_accused_id
+                        else:
+                            accuse_id = random.choice(self.alive_players_id_except(seer_accused_id))
+
                     votes[accuse_id] += 1
 
         votes_highest = defaultdict(list)
@@ -258,13 +272,14 @@ class Game(object):
 
     def night(self):
         # choose somebody to protect.
-        player_saved = None
+        player_protected = None
         for player in self.alive_players():
             if player.role == Role.Guard:
-                player_saved = player.Guard()
+                player_protected = player.Guard()
 
         # choose someone to kill.
-        player_killed = random.choice(self.alive_nonwerewolves_id())
+        player_killed_id = random.choice(self.alive_nonwerewolves_id())
+        player_killed = self.player_role[player_killed_id]
         # if the sheriff is not a werewolf, werewolves will kill the guard.
         for player in list(self.player_role.values()):
             if player.title == 'sheriff' and player.role != Role.Werewolf:
@@ -287,11 +302,12 @@ class Game(object):
                 if seer.credit >= 0.8:
                     seer.credit = 0.8
 
-        if player_saved != player_killed:
+        if player_protected != player_killed:
+            print('Player #{} ({}) was killed at night.'.format(player_killed.player_id, player_killed.role.name))
             for player in list(self.player_role.values()):
                 if player.player_id == player_killed:
                     player.is_alive = False
-                    print('Player #{} ({}) was killed at night.'.format(player.player_id, player.role.name))
+
         else:
             print('The Guard managed to protect the other player at night.')
 
@@ -397,5 +413,17 @@ class Player(object):
         return protected
 
 if __name__ == "__main__":
-    aGame = Game(11)
-    aGame.play()
+#    aGame = Game(11)
+#    if aGame.play() == 'v':
+#        print(1)
+
+    results = {}
+    results['Villagers won'] = 0
+    results['Werewolves won'] = 0
+    for i in range(500):
+        aGame = Game(11)
+        if aGame.play() == 'v':
+            results['Villagers won'] += 1
+        else:
+            results['Werewolves won'] += 1
+    print(results)
