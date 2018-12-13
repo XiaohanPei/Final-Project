@@ -50,7 +50,7 @@ class Game(object):
             return "w"
 
     def WerewolvesWon(self):
-        return len(self.alive_nonwerewolves_id()) <= len(self.alive_werewolves_id())
+        return len(self.alive_nonwerewolves_id()) < len(self.alive_werewolves_id())
 
     def VillagersWon(self):
         return len(self.alive_werewolves_id()) == 0
@@ -254,13 +254,18 @@ class Game(object):
                         if bernoulli.rvs(sheriff_credit) == 1:
                             accuse_id = sheriff_accused_id
                         else:
-                            accuse_id = random.choice(self.alive_players_id_except(sheriff_accused_id))
+                            if bernoulli.rvs(seer_credit)  == 1:
+                                accuse_id = seer_accused_id
+                            else:
+                                accuse_id = random.choice(self.alive_players_id_besides(sheriff_accused_id, seer_accused_id))
                     else:
                         if bernoulli.rvs(seer_credit) == 1:
                             accuse_id = seer_accused_id
                         else:
-                            accuse_id = random.choice(self.alive_players_id_except(seer_accused_id))
-
+                            if bernoulli.rvs(seer_credit)  == 1:
+                                accuse_id = sheriff_accused_id
+                            else:
+                                accuse_id = random.choice(self.alive_players_id_besides(sheriff_accused_id, seer_accused_id))
                     votes[accuse_id] += 1
 
         votes_highest = defaultdict(list)
@@ -281,17 +286,18 @@ class Game(object):
         player_killed_id = random.choice(self.alive_nonwerewolves_id())
         player_killed = self.player_role[player_killed_id]
         # if the sheriff is not a werewolf, werewolves will kill the guard.
-        for player in list(self.player_role.values()):
+        for player in self.alive_players():
             if player.title == 'sheriff' and player.role != Role.Werewolf:
                 player_killed = player
+                player_killed_id = player.player_id
 
         # Check someone's identity
-        for player in list(self.player_role.values()):
-            if player.role == Role.Seer and player.is_alive:
+        for player in self.alive_players():
+            if player.role == Role.Seer:
                 seer = player
                 player_checked = self.player_role[player.Seer()]
                 # if Seer is not the Sheriff, Seer must be very curious about the Sheriff's identity and check it.
-                for other in list(self.player_role.values()):
+                for other in self.alive_players():
                     if other.title == 'sheriff' and other.role != Role.Seer:
                         player_checked = other
                 seer.identity.append(player_checked)
@@ -302,14 +308,14 @@ class Game(object):
                 if seer.credit >= 0.8:
                     seer.credit = 0.8
 
-        if player_protected != player_killed:
-            print('Player #{} ({}) was killed at night.'.format(player_killed.player_id, player_killed.role.name))
-            for player in list(self.player_role.values()):
-                if player.player_id == player_killed:
+        if player_protected != player_killed_id:
+            print('Player #{} ({}) was killed at night.'.format(player_killed_id, player_killed.role.name))
+            for player in self.alive_players():
+                if player.player_id == player_killed_id:
                     player.is_alive = False
 
         else:
-            print('The Guard managed to protect the other player at night.')
+            print('The Guard protected player #{} successfully.'.format(player_protected))
 
     def day(self):
         # select a sheriff if there is no sheriff
@@ -323,55 +329,58 @@ class Game(object):
 
             # vote
             eliminated_id = self.vote_only_one_accusation(sheriff_id, sheriff_credit, seer_accuse_id)
+            print('Player #{} is eliminated in this round.'.format(eliminated_id))
             for player in list(self.player_role.values()):
                 if player.player_id == eliminated_id:
                     player.is_alive = False
-                    print('Player #{} is eliminated in this round.'.format(eliminated_id))
 
         # when the sheriff is a werewolf, who will be accused by the sheriff
         elif self.player_role[sheriff_id].role == Role.Werewolf:
             werewolf_accuse_id = random.choice(self.alive_nonwerewolves_id())
             print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id, werewolf_accuse_id))
 
-            seer_id = 999
-            seer_credit = -1
+            seer_id = None
+            seer_credit = None
             for player in self.alive_players():
                 if player.role == Role.Seer:
                     seer_id = player.player_id
                     seer_credit = player.credit
 
-            if seer_id == 999:
+            if seer_id == None:
                 eliminated_id = self.vote_only_one_accusation(sheriff_id, sheriff_credit, werewolf_accuse_id)
-                for player in list(self.player_role.values()):
+                print('Player #{} is eliminated in this round.'.format(eliminated_id))
+                for player in self.alive_players():
                     if player.player_id == eliminated_id:
                         player.is_alive = False
-                        print('Player #{} is eliminated in this round.'.format(eliminated_id))
+
             else:
                 seer_accuse_id = self.accused_by_seer()
+                print('Player #{} says Player #{} is a Werewolf.'.format(seer_id,seer_accuse_id))
                 eliminated_id = self.vote_for_two_accusations(sheriff_id, sheriff_credit, werewolf_accuse_id, seer_id, seer_credit, seer_accuse_id)
-                for player in list(self.player_role.values()):
+                print('Player #{} is eliminated in this round.'.format(eliminated_id))
+                for player in self.alive_players():
                     if player.player_id == eliminated_id:
                         player.is_alive = False
-                        print('Player #{} is eliminated in this round.'.format(eliminated_id))
+
+
 
         # when the sheriff is neither a werewolf nor seer, who will be accused by the sheriff
         else:
             sheriff_accuse_id = random.choice(self.alive_players_id_except(sheriff_id))
             print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id, sheriff_accuse_id))
             eliminated_id = self.vote_only_one_accusation(sheriff_id, sheriff_credit, sheriff_accuse_id)
+            print('Player #{} is eliminated in this round.'.format(eliminated_id))
             for player in list(self.player_role.values()):
                 if player.player_id == eliminated_id:
                     player.is_alive = False
-                    print('Player #{} is eliminated in this round.'.format(eliminated_id))
 
 class Player(object):
-    def __init__(self, player_id, role, num_players, title=None, credit=0.5, vote = 0):
+    def __init__(self, player_id, role, num_players, title=None, credit=0.5):
         self.player_id = player_id
         self.role = role
         self.is_alive = True
         self.credit = credit
         self.title = title
-        self.vote = vote
 
         if self.role == Role.Seer:
             # a list of identities that seer has checked
@@ -393,7 +402,7 @@ class Player(object):
         if len(unknown) > 0:
             return random.choice(unknown)
         else:
-            return 999
+            return seer.player_id
 
     def Guard(self):
         civilian = []
@@ -407,21 +416,20 @@ class Player(object):
                 sheriff = player
                 decision = bernoulli.rvs(sheriff.credit)
                 if decision == 1:
-                    protected = sheriff
+                    protected = sheriff.player_id
                 else:
                     protected = random.choice(civilian)
         return protected
 
 if __name__ == "__main__":
-#    aGame = Game(11)
-#    if aGame.play() == 'v':
-#        print(1)
 
     results = {}
     results['Villagers won'] = 0
     results['Werewolves won'] = 0
-    for i in range(500):
+    for i in range(1000):
         aGame = Game(11)
+
+
         if aGame.play() == 'v':
             results['Villagers won'] += 1
         else:
