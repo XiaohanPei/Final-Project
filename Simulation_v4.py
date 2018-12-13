@@ -1,5 +1,7 @@
 from enum import Enum
 import random
+import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.stats import bernoulli
 from collections import defaultdict
 from operator import itemgetter
@@ -17,13 +19,13 @@ class Game(object):
 
         for i in range(1, num_players + 1):
             if i <= 3:
-                self.player_role[i] = Player(i, Role.Werewolf, self.num_players)
+                self.player_role[i] = Player(i, Role.Werewolf)
             if i == 4:
-                self.player_role[i] = Player(i, Role.Seer, self.num_players)
+                self.player_role[i] = Player(i, Role.Seer)
             if i == 5:
-                self.player_role[i] = Player(i, Role.Guard, self.num_players)
+                self.player_role[i] = Player(i, Role.Guard)
             if i >= 6 and i <= num_players:
-                self.player_role[i] = Player(i, Role.Villager, self.num_players)
+                self.player_role[i] = Player(i, Role.Villager)
 
     def play(self):
         villagersWon = False
@@ -42,15 +44,15 @@ class Game(object):
             werewolvesWon = self.WerewolvesWon()
 
         if villagersWon:
-            print("The Villagers have won!")
+            print("The Villagers have won!\n", file = open("Activity Log.txt", 'a'))
             return 'v'
 
         else:
-            print("The Werewolves have won!")
+            print("The Werewolves have won!\n", file = open("Activity Log.txt", 'a'))
             return "w"
 
     def WerewolvesWon(self):
-        return len(self.alive_nonwerewolves_id()) < len(self.alive_werewolves_id())
+        return len(self.alive_nonwerewolves_id()) <= len(self.alive_werewolves_id())
 
     def VillagersWon(self):
         return len(self.alive_werewolves_id()) == 0
@@ -254,7 +256,7 @@ class Game(object):
                         if bernoulli.rvs(sheriff_credit) == 1:
                             accuse_id = sheriff_accused_id
                         else:
-                            if bernoulli.rvs(seer_credit)  == 1:
+                            if bernoulli.rvs(seer_credit) == 1:
                                 accuse_id = seer_accused_id
                             else:
                                 accuse_id = random.choice(self.alive_players_id_besides(sheriff_accused_id, seer_accused_id))
@@ -309,13 +311,12 @@ class Game(object):
                     seer.credit = 0.8
 
         if player_protected != player_killed_id:
-            print('Player #{} ({}) was killed at night.'.format(player_killed_id, player_killed.role.name))
+            print('Player #{} ({}) was killed at night.'.format(player_killed_id, player_killed.role.name), file = open("Activity Log.txt", 'a'))
             for player in self.alive_players():
                 if player.player_id == player_killed_id:
                     player.is_alive = False
-
         else:
-            print('The Guard protected player #{} successfully.'.format(player_protected))
+            print('The Guard protected player #{} successfully.'.format(player_protected), file = open("Activity Log.txt", 'a'))
 
     def day(self):
         # select a sheriff if there is no sheriff
@@ -325,11 +326,10 @@ class Game(object):
         # when the sheriff is the seer, only one person will be accused
         if self.player_role[sheriff_id].role == Role.Seer:
             seer_accuse_id = self.accused_by_seer()
-            print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id,seer_accuse_id) )
-
+            print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id,seer_accuse_id), file = open("Activity Log.txt", 'a'))
             # vote
             eliminated_id = self.vote_only_one_accusation(sheriff_id, sheriff_credit, seer_accuse_id)
-            print('Player #{} is eliminated in this round.'.format(eliminated_id))
+            print('Player #{} is eliminated in this round.'.format(eliminated_id), file = open("Activity Log.txt", 'a'))
             for player in list(self.player_role.values()):
                 if player.player_id == eliminated_id:
                     player.is_alive = False
@@ -337,7 +337,7 @@ class Game(object):
         # when the sheriff is a werewolf, who will be accused by the sheriff
         elif self.player_role[sheriff_id].role == Role.Werewolf:
             werewolf_accuse_id = random.choice(self.alive_nonwerewolves_id())
-            print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id, werewolf_accuse_id))
+            print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id, werewolf_accuse_id), file = open("Activity Log.txt", 'a'))
 
             seer_id = None
             seer_credit = None
@@ -345,37 +345,35 @@ class Game(object):
                 if player.role == Role.Seer:
                     seer_id = player.player_id
                     seer_credit = player.credit
-
+            # when seer is dead, there's only one accusation from the sheriff
             if seer_id == None:
                 eliminated_id = self.vote_only_one_accusation(sheriff_id, sheriff_credit, werewolf_accuse_id)
-                print('Player #{} is eliminated in this round.'.format(eliminated_id))
+                print('Player #{} is eliminated in this round.'.format(eliminated_id), file = open("Activity Log.txt", 'a'))
                 for player in self.alive_players():
                     if player.player_id == eliminated_id:
                         player.is_alive = False
-
+            # when the seer is alive, there're two accusations from the sheriff and the seer
             else:
                 seer_accuse_id = self.accused_by_seer()
-                print('Player #{} says Player #{} is a Werewolf.'.format(seer_id,seer_accuse_id))
+                print('Player #{} says Player #{} is a Werewolf.'.format(seer_id,seer_accuse_id), file = open("Activity Log.txt", 'a'))
                 eliminated_id = self.vote_for_two_accusations(sheriff_id, sheriff_credit, werewolf_accuse_id, seer_id, seer_credit, seer_accuse_id)
-                print('Player #{} is eliminated in this round.'.format(eliminated_id))
+                print('Player #{} is eliminated in this round.'.format(eliminated_id), file = open("Activity Log.txt", 'a'))
                 for player in self.alive_players():
                     if player.player_id == eliminated_id:
                         player.is_alive = False
-
-
 
         # when the sheriff is neither a werewolf nor seer, who will be accused by the sheriff
         else:
             sheriff_accuse_id = random.choice(self.alive_players_id_except(sheriff_id))
-            print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id, sheriff_accuse_id))
+            print('Player #{} says Player #{} is a Werewolf.'.format(sheriff_id, sheriff_accuse_id), file = open("Activity Log.txt", 'a'))
             eliminated_id = self.vote_only_one_accusation(sheriff_id, sheriff_credit, sheriff_accuse_id)
-            print('Player #{} is eliminated in this round.'.format(eliminated_id))
+            print('Player #{} is eliminated in this round.'.format(eliminated_id), file = open("Activity Log.txt", 'a'))
             for player in list(self.player_role.values()):
                 if player.player_id == eliminated_id:
                     player.is_alive = False
 
 class Player(object):
-    def __init__(self, player_id, role, num_players, title=None, credit=0.5):
+    def __init__(self, player_id, role, title=None, credit=0.5):
         self.player_id = player_id
         self.role = role
         self.is_alive = True
@@ -385,6 +383,7 @@ class Player(object):
         if self.role == Role.Seer:
             # a list of identities that seer has checked
             self.identity = []
+        # werewolves' default credit is 0.6
         elif self.role == Role.Werewolf:
             self.credit = 0.6
 
@@ -422,16 +421,42 @@ class Player(object):
         return protected
 
 if __name__ == "__main__":
+    results = pd.DataFrame()
+    num_players = []
+    freq_villagers = []
+    freq_werewolves = []
+    rate_villagers = []
+    rate_werewolves = []
 
-    results = {}
-    results['Villagers won'] = 0
-    results['Werewolves won'] = 0
-    for i in range(1000):
-        aGame = Game(11)
+    for num in range(11, 17):
+        num_players.append(num)
+        villagers_won = 0
+        werewolves_won = 0
 
+        for i in range(1000):
+            aGame = Game(num)
+            if aGame.play() == 'v':
+                villagers_won += 1
+            else:
+                werewolves_won += 1
 
-        if aGame.play() == 'v':
-            results['Villagers won'] += 1
-        else:
-            results['Werewolves won'] += 1
-    print(results)
+        freq_villagers.append(villagers_won)
+        freq_werewolves.append(werewolves_won)
+
+        villagers_rate = villagers_won / (villagers_won + werewolves_won)
+        werewolves_rate = werewolves_won / (villagers_won + werewolves_won)
+
+        rate_villagers.append(villagers_rate)
+        rate_werewolves.append(werewolves_rate)
+
+    results['Num of Players'] = num_players
+    results['Villagers Winning Freq'] = freq_villagers
+    results['Villagers Winning Rate'] = rate_villagers
+    results['Werewolves Winning Freq'] = freq_werewolves
+    results['Werewolves Winning Rate'] = rate_werewolves
+
+    results.to_csv('Simulation Results.csv', index = False)
+
+    results.plot.line(x = 'Num of Players', y = 'Villagers Winning Rate')
+    results.plot.line(x = 'Num of Players', y = 'Werewolves Winning Rate')
+    plt.show()
