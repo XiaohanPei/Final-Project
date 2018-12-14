@@ -52,7 +52,7 @@ class Game(object):
             return "w"
 
     def WerewolvesWon(self):
-        return len(self.alive_nonwerewolves_id()) <= len(self.alive_werewolves_id())
+        return len(self.alive_nonwerewolves_id()) == 0
 
     def VillagersWon(self):
         return len(self.alive_werewolves_id()) == 0
@@ -140,24 +140,29 @@ class Game(object):
                 if dec == 1:
                     sheriff_id = random.choice(non_highest_id)
                     self.player_role[sheriff_id].title = 'sheriff'
+                    self.player_role[sheriff_id].credit += 0.1
                     return sheriff_id
                 else:
                     sheriff_id = random.choice(wolf_highest_id)
                     self.player_role[sheriff_id].title = 'sheriff'
+                    self.player_role[sheriff_id].credit += 0.1
                     return sheriff_id
             elif wolf_credit < non_credit:
                 dec = bernoulli.rvs(wolf_credit)
                 if dec == 1:
                     sheriff_id = random.choice(wolf_highest_id)
                     self.player_role[sheriff_id].title = 'sheriff'
+                    self.player_role[sheriff_id].credit += 0.1
                     return sheriff_id
                 else:
                     sheriff_id = random.choice(non_highest_id)
                     self.player_role[sheriff_id].title = 'sheriff'
+                    self.player_role[sheriff_id].credit += 0.1
                     return sheriff_id
             else:
                 sheriff_id = random.choice(non_highest_id+wolf_highest_id)
                 self.player_role[sheriff_id].title = 'sheriff'
+                self.player_role[sheriff_id].credit += 0.1
                 return sheriff_id
 
     # who will be accused by seer
@@ -202,12 +207,15 @@ class Game(object):
         for player in self.alive_players():
             if player.player_id == sheriff_id:
                 votes[accused_id] += 1
+            elif player.player_id == accused_id:
+                new_accuse_id = random.choice(self.alive_players_id_except(accused_id))
+                votes[new_accuse_id] += 1
             else:
                 voting = bernoulli.rvs(sheriff_credit)
                 if voting == 1:
                     votes[accused_id] += 1
                 else:
-                    new_accuse_id = random.choice(self.alive_players_id_except(accused_id))
+                    new_accuse_id = random.choice(self.alive_players_id_besides(player.player_id,accused_id))
                     votes[new_accuse_id] += 1
 
         votes_highest = defaultdict(list)
@@ -226,6 +234,9 @@ class Game(object):
                 votes[sheriff_accused_id] += 1
             elif player.player_id == seer_id:
                 votes[seer_accused_id] += 1
+            elif player.player_id == sheriff_accused_id or player.player_id == seer_accused_id:
+                new_accuse_id = random.choice(self.alive_players_id_besides(sheriff_accused_id, seer_accused_id))
+                votes[new_accuse_id] += 1
             else:
                 if sheriff_credit > seer_credit:
                     dec1 = bernoulli.rvs(sheriff_credit)
