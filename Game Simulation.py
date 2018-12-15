@@ -69,14 +69,14 @@ class Game(object):
     def WerewolvesWon(self):
         """
         Victory condition for werewolves.
-        :return: True, if the number of villagers is not larger than the number of werewolves; False, otherwise.
+        :return: True, if there are no alive villagers left in game; False, otherwise.
         """
         return len(self.alive_nonwerewolves_id()) == 0
 
     def VillagersWon(self):
         """
         Victory condition for villagers.
-        :return: True, if there are no werewolf left alive in game; False, otherwise.
+        :return: True, if there are no alive werewolves left in game; False, otherwise.
         """
         return len(self.alive_werewolves_id()) == 0
 
