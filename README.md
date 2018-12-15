@@ -64,6 +64,7 @@ Extra variables are included for the simulation:
   * A text file including all the activity log from the simulations
   * A csv file consisting of the stats (winning frequencies & rates) with the number of players from 11 to 16
   * Two line charts showing the winning rate of Werewolves and Villagers
+* There is a sample of the outputs in the sample_results file.
   
 ## All Sources Used:
 https://en.wikipedia.org/wiki/The_Werewolves_of_Millers_Hollow
