@@ -140,7 +140,7 @@ class Game(object):
         We assume in this program that only a villager and a werewolf will run for the sheriff title, when seer is
         alive, he will be the villager candidate; when seer is dead, we randomly choose another villager to take
         his place.
-        :return:
+        :return: sheriff's ID.
         """
         alive_titles = []
         for player in self.alive_players():
